@@ -1,0 +1,28 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "the-throne",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "throne-db",
+      // Replace with the id printed by `npx wrangler d1 create throne-db`
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  // Caps checkout attempts per IP (each one costs a moderation API call).
+  "ratelimits": [
+    { "name": "CHECKOUT_LIMITER", "namespace_id": "1001", "simple": { "limit": 5, "period": 60 } }
+  ],
+  // Non-secret settings. Secrets go in via `npx wrangler secret put <NAME>`
+  // (production) or a local .dev.vars file (development).
+  "vars": {
+    "SITE_URL": "https://the-throne.example.workers.dev",
+    "CONTACT_EMAIL": "hello@example.com",
+    "EMAIL_FROM": "The Throne <throne@example.com>"
+  }
+}
