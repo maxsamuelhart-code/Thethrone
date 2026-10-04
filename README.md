@@ -12,7 +12,7 @@ Pay £2, take the throne. Your name and message sit on the homepage, with a live
 4. Stripe calls `POST /api/stripe-webhook`. The signature is verified, the amount (£2 GBP) is checked, and only then is the reign written to D1.
 5. **Payment order:** reigns are ordered by Stripe's payment timestamp, not by when the webhook arrives. If two people pay at nearly the same time and the webhooks arrive out of order, both still go into the timeline in the order they paid. Webhook retries are ignored (`stripe_session_id` is `UNIQUE`).
 6. The dethroned king gets an email via Resend: *"You've been dethroned by [name]. Take it back →"*.
-7. `/admin` (password protected) lists every reign and can delete any message instantly.
+7. `/admin` (password protected) lists every reign. It can delete any message, or rename any king to "Anonymous", instantly.
 
 ```
 src/
@@ -139,7 +139,7 @@ npx wrangler secret list
 3. Enter a normal name and message with **your own email**. Pay with Stripe's test card `4242 4242 4242 4242`, any future expiry date, any CVC.
 4. You should come back to "Payment received! Polishing your crown…" and then see yourself crowned.
 5. Do it again with a different name and a second email address you can check. The first address should get the "dethroned" email.
-6. Visit `/admin`, enter the password and delete a message. It disappears from the homepage straight away.
+6. Visit `/admin`, enter the password, delete a message and rename someone to Anonymous. Both change the homepage straight away.
 7. If something fails: **Stripe → Developers → Webhooks → your endpoint** shows each delivery and its response. `npx wrangler tail` streams the Worker's logs live.
 
 ### Step 8: Go live

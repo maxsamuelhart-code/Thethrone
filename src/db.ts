@@ -110,3 +110,10 @@ export async function recentReigns(env: Env, limit = 200): Promise<Reign[]> {
 export async function deleteMessage(env: Env, id: number): Promise<void> {
   await env.DB.prepare(`UPDATE reigns SET message = '', message_removed = 1 WHERE id = ?`).bind(id).run();
 }
+
+export const ANONYMOUS = "Anonymous";
+
+/** Replaces the name everywhere it appears (homepage, leaderboard, future dethroned emails). */
+export async function anonymiseName(env: Env, id: number): Promise<void> {
+  await env.DB.prepare(`UPDATE reigns SET name = ? WHERE id = ?`).bind(ANONYMOUS, id).run();
+}

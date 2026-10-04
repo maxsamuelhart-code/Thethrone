@@ -1,5 +1,5 @@
 import type { Env } from "./env";
-import type { PublicReign, Reign } from "./db";
+import { ANONYMOUS, type PublicReign, type Reign } from "./db";
 import { MESSAGE_MAX, NAME_MAX } from "./validate";
 
 export const escapeHtml = (s: string) =>
@@ -299,6 +299,7 @@ export function adminPage(env: Env, reigns: Reign[], nonce: string, notice?: str
     <small>${r.message_removed ? "<em>message deleted</em>" : escapeHtml(r.message) || "<em>no message</em>"}</small>
     <small>${escapeHtml(r.email)} · ${new Date(r.paid_at).toISOString().replace("T", " ").slice(0, 19)} UTC</small>
   </span>
+  <span class="actions">
   ${
     r.message_removed || !r.message
       ? ""
@@ -307,18 +308,29 @@ export function adminPage(env: Env, reigns: Reign[], nonce: string, notice?: str
     <button class="del" type="submit">Delete message</button>
   </form>`
   }
+  ${
+    r.name === ANONYMOUS
+      ? ""
+      : `<form method="post" action="/admin/anonymise-name">
+    <input type="hidden" name="id" value="${r.id}">
+    <button class="del alt" type="submit">Rename to ${ANONYMOUS}</button>
+  </form>`
+  }
+  </span>
 </li>`,
     )
     .join("");
   const body = `
 <h2>Admin</h2>
 ${notice ? `<div class="banner ok">${escapeHtml(notice)}</div>` : ""}
-<p class="sub">Most recent ${reigns.length} reigns. Deleting a message removes it from the site immediately.</p>
+<p class="sub">Most recent ${reigns.length} reigns. Deleting a message or renaming a king changes the site immediately and cannot be undone.</p>
 <ol class="board">${rows || '<li class="empty-board">No reigns yet.</li>'}</ol>
 <style nonce="${nonce}">
 .board li{align-items:flex-start}
 .del{background:var(--pink);color:#fff;border:0;border-radius:12px;padding:10px 12px;font:inherit;font-weight:700;cursor:pointer;white-space:nowrap}
 .board .who small{white-space:normal}
+.actions{display:grid;gap:6px}
+.del.alt{background:#ffffff26}
 </style>`;
   return layout(env, "Admin · The Throne", body, nonce);
 }

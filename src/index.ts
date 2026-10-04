@@ -1,5 +1,5 @@
 import type { Env } from "./env";
-import { currentKing, deleteMessage, isCrowned, leaderboard, recentReigns } from "./db";
+import { anonymiseName, currentKing, deleteMessage, isCrowned, leaderboard, recentReigns } from "./db";
 import { sendDethronedEmail } from "./email";
 import { adminPage, homePage, privacyPage, termsPage } from "./html";
 import { moderate, ModerationUnavailableError } from "./moderation";
@@ -129,17 +129,28 @@ async function handleAdmin(request: Request, env: Env, url: URL): Promise<Respon
   if (!(await isAdmin(request, env))) return unauthorized();
   const nonce = newNonce();
 
-  if (request.method === "POST" && url.pathname === "/admin/delete-message") {
+  const actions: Record<string, { run: (env: Env, id: number) => Promise<void>; done: string }> = {
+    "/admin/delete-message": { run: deleteMessage, done: "deleted" },
+    "/admin/anonymise-name": { run: anonymiseName, done: "anonymised" },
+  };
+  const action = actions[url.pathname];
+  if (request.method === "POST" && action) {
     if (!sameOrigin(request)) return new Response("Bad origin", { status: 403 });
     const form = await request.formData();
     const id = Number(form.get("id"));
     if (!Number.isInteger(id) || id <= 0) return new Response("Bad id", { status: 400 });
-    await deleteMessage(env, id);
-    return Response.redirect(`${url.origin}/admin?deleted=${id}`, 303);
+    await action.run(env, id);
+    return Response.redirect(`${url.origin}/admin?${action.done}=${id}`, 303);
   }
   if (request.method === "GET" && url.pathname === "/admin") {
     const deleted = url.searchParams.get("deleted");
-    return html(adminPage(env, await recentReigns(env), nonce, deleted ? `Message #${deleted} deleted.` : undefined), nonce);
+    const anonymised = url.searchParams.get("anonymised");
+    const notice = deleted
+      ? `Message #${deleted} deleted.`
+      : anonymised
+        ? `Entry #${anonymised} renamed to Anonymous.`
+        : undefined;
+    return html(adminPage(env, await recentReigns(env), nonce, notice), nonce);
   }
   return new Response("Not found", { status: 404 });
 }
