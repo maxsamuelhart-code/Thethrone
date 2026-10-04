@@ -28,6 +28,38 @@ migrations/0001_init.sql
 
 ---
 
+## Quick setup (one command)
+
+Once your accounts exist, `npm run setup` does all of Steps 1 and 3–6 below for you:
+
+1. Create the accounts and get the keys:
+   - **Cloudflare:** https://dash.cloudflare.com/sign-up
+   - **Anthropic:** https://console.anthropic.com. Add credit, set a spend limit, create an API key.
+   - **Stripe:** https://dashboard.stripe.com/register. In **Test mode**, copy the secret key (`sk_test_...`). You do *not* need to create the webhook; the script does it.
+   - **Resend:** https://resend.com. Verify your domain (Step 4.2 below), then create an API key.
+2. Run:
+   ```bash
+   npm install
+   npx wrangler login
+   cp prod.vars.example prod.vars    # paste your keys and emails into it (git-ignored)
+   npm run setup
+   ```
+
+The script:
+- creates the database and runs the migrations
+- deploys the site
+- registers the Stripe webhook and stores its signing secret
+- uploads every secret
+- checks the live site responds
+
+It prints your site URL and, if you left `ADMIN_PASSWORD` blank, a generated admin password. Save that password: if you re-run the script with it still blank, it sets a new one.
+
+Then do **Step 7** (test) and **Step 8** (go live). To go live, put your `sk_live_...` key in `prod.vars` and run `npm run setup` again. It registers a live webhook automatically.
+
+The manual steps below do the same thing by hand, if you'd rather see each piece.
+
+---
+
 ## Setup and deployment, step by step
 
 Takes about 45 minutes. You need **Node.js 20+** and a terminal. Set everything up in **test mode** first and switch to live payments at the end.
@@ -145,7 +177,7 @@ npx wrangler secret list
 ### Step 8: Go live
 
 1. In Stripe, click **Activate payments** and fill in your business and bank details.
-2. Switch the dashboard **out of** Test mode, then repeat Step 3 with the **live** keys: a new `sk_live_...` secret key and a **new** live webhook endpoint (it has its own `whsec_...`). Run `wrangler secret put` again for both.
+2. Switch the dashboard **out of** Test mode and copy the `sk_live_...` key. Either put it in `prod.vars` and run `npm run setup` again, or repeat Step 3 by hand with the live key and a **new** live webhook endpoint (it has its own `whsec_...`).
 3. Optional: use your own domain. **Cloudflare dashboard → Workers & Pages → the-throne → Settings → Domains & Routes → Add custom domain.** Then update `SITE_URL`, run `npm run deploy`, and update the Stripe webhook URL to the new domain.
 4. Make one real £2 payment to yourself to confirm it all works. You can refund it from the Stripe dashboard.
 5. Before launch, review `/terms` and `/privacy` (in `src/html.ts`). They're starter templates, not legal advice. UK consumer rules generally require selling businesses to show a trading name and a geographic address.

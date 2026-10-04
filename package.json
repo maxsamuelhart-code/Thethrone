@@ -8,7 +8,8 @@
     "deploy": "wrangler deploy",
     "typecheck": "tsc --noEmit",
     "db:migrate:local": "wrangler d1 migrations apply throne-db --local",
-    "db:migrate:remote": "wrangler d1 migrations apply throne-db --remote"
+    "db:migrate:remote": "wrangler d1 migrations apply throne-db --remote",
+    "setup": "node scripts/setup.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",

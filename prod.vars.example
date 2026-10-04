@@ -1,0 +1,11 @@
+# Copy to prod.vars (git-ignored), fill in, then run: npm run setup
+# Start with Stripe TEST keys (sk_test_...). Re-run with sk_live_... to go live.
+ANTHROPIC_API_KEY=sk-ant-...
+STRIPE_SECRET_KEY=sk_test_...
+RESEND_API_KEY=re_...
+CONTACT_EMAIL=you@yourdomain.com
+EMAIL_FROM=The Throne <throne@mail.yourdomain.com>
+# Optional. Leave blank to generate a strong one (printed once at the end).
+ADMIN_PASSWORD=
+# Optional. Only if you've attached a custom domain; otherwise the workers.dev URL is used.
+SITE_URL=
