@@ -1,0 +1,10 @@
+{
+  "name": "SeedScout",
+  "short_name": "SeedScout",
+  "description": "Minecraft seed map, scores, loot and search",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#14171a",
+  "theme_color": "#14171a",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

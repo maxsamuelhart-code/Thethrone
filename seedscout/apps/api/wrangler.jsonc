@@ -1,0 +1,46 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "seedscout",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  // The built web app (apps/web/dist) is served from the same origin, so the
+  // session cookie needs no CORS. Only /api/* runs the Worker.
+  "assets": {
+    "directory": "../web/dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "seedscout-db",
+      // Replace with the id printed by `npx wrangler d1 create seedscout-db`
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  // Search jobs run in time-boxed batches; each batch re-enqueues the job until done.
+  "queues": {
+    "producers": [{ "binding": "SEARCH_QUEUE", "queue": "seedscout-search" }],
+    "consumers": [{ "queue": "seedscout-search", "max_batch_size": 1, "max_retries": 3 }]
+  },
+  // Paid Workers plan: allow long CPU bursts for search batches.
+  "limits": { "cpu_ms": 300000 },
+  "ratelimits": [
+    { "name": "LOGIN_LIMITER", "namespace_id": "2001", "simple": { "limit": 5, "period": 60 } },
+    { "name": "API_LIMITER", "namespace_id": "2002", "simple": { "limit": 60, "period": 60 } }
+  ],
+  // Non-secret settings. Secrets (STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, RESEND_API_KEY)
+  // go in via `npx wrangler secret put <NAME>` or a local .dev.vars file.
+  "vars": {
+    "SITE_URL": "http://localhost:5173",
+    "EMAIL_FROM": "SeedScout <login@example.com>",
+    "STRIPE_PRICE_MONTH": "price_xxx",
+    "STRIPE_PRICE_YEAR": "price_xxx",
+    "LOOT_ALLOW_UNVERIFIED": "0",
+    "DEV": "0"
+  }
+}

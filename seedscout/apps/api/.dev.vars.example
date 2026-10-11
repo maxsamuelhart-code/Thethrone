@@ -1,0 +1,6 @@
+STRIPE_SECRET_KEY=sk_test_xxx
+STRIPE_WEBHOOK_SECRET=whsec_xxx
+# Optional in dev: without it, magic links are logged and returned by the login endpoint.
+RESEND_API_KEY=
+DEV=1
+LOOT_ALLOW_UNVERIFIED=1
